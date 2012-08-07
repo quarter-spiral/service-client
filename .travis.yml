@@ -6,3 +6,4 @@ rvm:
   - rbx-19mode
 notifications:
   email: false
+  campfire: "rumspringa:c0a20e6caab984176e5c72f84241b5f419662257@504871"
