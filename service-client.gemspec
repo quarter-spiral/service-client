@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.version       = Service::Client::VERSION
 
   gem.add_dependency 'faraday', '0.8.1'
+  gem.add_dependency 'json'
 end
