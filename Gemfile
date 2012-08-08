@@ -8,3 +8,7 @@ gem 'rake'
 group :test do
   gem 'realweb'
 end
+
+platforms :jruby do
+  gem "jruby-openssl"
+end
