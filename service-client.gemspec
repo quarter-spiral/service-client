@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "service-client"
   gem.require_paths = ["lib"]
   gem.version       = Service::Client::VERSION
+
+  gem.add_dependency 'faraday', '0.8.1'
 end

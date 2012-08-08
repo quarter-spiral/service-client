@@ -1,5 +1,6 @@
 require "service-client/version"
 require "service-client/raw_interface"
+require "service-client/adapter/faraday"
 
 module Service
   class Client
