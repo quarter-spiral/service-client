@@ -4,7 +4,7 @@ require 'json'
 
 describe Service::Client::Adapter::Faraday do
   before do
-    $__service_client_test_server ||= RealWeb.start_server(File.expand_path("../test_server.ru", __FILE__))
+    $__service_client_test_server ||= RealWeb.start_server_in_thread(File.expand_path("../test_server.ru", __FILE__))
     @server = $__service_client_test_server
     @url = @server.base_uri.to_s
     @adapter = Service::Client::Adapter::Faraday.new
