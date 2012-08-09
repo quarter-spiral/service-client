@@ -77,7 +77,7 @@ rescue Client::Service::ServiceError => e
 end
 ```
 
-If the body was not JSON encoded at all or did not include the ``error`` key on the root level a ``Service::Client::Error`` is raised.
+If the body was not JSON encoded at all or did not include the ``error`` key on the root level a ``Service::Client::ResponseError`` is raised.
 
 ```ruby
 begin

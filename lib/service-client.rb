@@ -1,6 +1,8 @@
 require "service-client/version"
 require "service-client/error"
 require "service-client/routing_error"
+require "service-client/service_error"
+require "service-client/response_error"
 require "service-client/raw_interface"
 require "service-client/adapter/faraday"
 require "service-client/url_pattern"
@@ -48,16 +50,28 @@ module Service
 
     protected
     def request(method, bound_route, body_hash)
-     url = bound_route.url_for_method(method)
-     body = body_hash ? JSON.dump(body_hash) : ''
+      url = bound_route.url_for_method(method)
+      body = body_hash ? JSON.dump(body_hash) : ''
 
-     raw_response = raw.request(method, url, body, {})
-     case raw_response.status
-     when 200
-      Response.new(raw_response)
-     when 301, 302, 303, 307
-       raise Redirection.new(raw_response)
-     end
+      raw_response = raw.request(method, url, body, {})
+      case raw_response.status
+      when 200
+       Response.new(raw_response)
+      when 301, 302, 303, 307
+        raise Redirection.new(raw_response)
+      else
+        error = nil
+        begin
+          error = JSON.parse(raw_response.body.first)['error']
+        rescue JSON::ParserError
+          # treat invalid JSON the same as non-present error field
+        end
+        if error
+          raise ServiceError.new(error)
+        else
+          raise ResponseError.new(raw_response)
+        end
+      end
     end
   end
 end

@@ -8,6 +8,18 @@ def must_send_request(method, url, json = nil, options = {}, &blck)
   @client.raw.adapter = MiniTest::Mock.new
 end
 
+def must_raise_response_error(body)
+  raw_response = Rack::Response.new(body, 500, {})
+  @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', body, {}]
+  begin
+    @client.get(@client.urls.author(123))
+    flunk "Must raise Service::Client::ResponseError but didn't!"
+   rescue Service::Client::ResponseError => e
+     e.response.status.must_equal 500
+     e.response.body.must_equal [body]
+   end
+end
+
 describe Service::Client do
   before do
     @client = Service::Client.new('http://example.com')
@@ -114,13 +126,50 @@ describe Service::Client do
         statuses.each do |status|
           it "raises a Service::Client::Redirection with the location for HTTP status #{status}" do
             @client.raw.adapter.expect :request, Rack::Response.new('', status, {Location: 'http://example.com/somewhere/else'}), [:get, 'http://example.com/authors/123', '', {}]
+
             begin
               @client.get(@client.urls.author(123))
+              flunk "Must raise Service::Client::Redirection but didn't!"
             rescue Service::Client::Redirection => e
               e.location.must_equal 'http://example.com/somewhere/else'
-            else
-              flunk "Must raise Service::Client::Redirection but didn't!"
             end
+          end
+        end
+      end
+
+      describe "errors" do
+        describe "when error field is present" do
+          before do
+            @body = JSON.dump(error: 'This is why!')
+          end
+
+          error_states = [400, 401, 403, 404, 500]
+          error_states.each do |error_state|
+            it "raises an Service::Client::ServiceError for HTTP status code #{error_state}" do
+              raw_response = Rack::Response.new(@body, error_state, {})
+              @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', @body, {}]
+
+              begin
+                @client.get(@client.urls.author(123))
+                flunk "Must raise Service::Client::ServiceError but didn't!"
+              rescue Service::Client::ServiceError => e
+                e.error.must_equal 'This is why!'
+              end
+            end
+          end
+        end
+
+        describe "raises Service::Client::ResponseError when body is" do
+          it "empty" do
+            must_raise_response_error('')
+          end
+
+          it "invalid JSON" do
+            must_raise_response_error('some stuff but not json')
+          end
+
+          it "valid JSON but has no error field" do
+            must_raise_response_error(JSON.dump(missing: 'error', field: true))
           end
         end
       end
