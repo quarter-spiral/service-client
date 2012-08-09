@@ -5,12 +5,22 @@ module Service
     class RawInterface
       def initialize(client)
         @client = client
+      end
 
-        [:get, :put, :post, :delete].each do |method|
-          self.class.send(:define_method, method) do |url, body = nil, options = {}|
-            self.request(method, url, body, options)
-          end
-        end
+      def get(url, body, options)
+        request(:get, url, body, options)
+      end
+
+      def put(url, body, options)
+        request(:put, url, body, options)
+      end
+
+      def post(url, body, options)
+        request(:post, url, body, options)
+      end
+
+      def delete(url, body, options)
+        request(:delete, url, body, options)
       end
 
       def adapter
@@ -21,13 +31,13 @@ module Service
         @adapter = new_adapter
       end
 
-      protected
-      def default_adapter
-        nil
-      end
-
       def request(method, url, body, options)
         adapter.request(method, absolutize_url(url), body, options)
+      end
+
+      protected
+      def default_adapter
+        Adapter::Faraday
       end
 
       def absolutize_url(url)
