@@ -47,7 +47,7 @@ describe Service::Client do
       end
 
       must_send_request(:get, 'http://example.com/authors/123') do
-         @client.get(@client.urls.author(123))
+        @client.get(@client.urls.author(123))
       end
 
       must_send_request(:post, 'http://example.com/authors/123/books/456', name: 'Ronald Review', comment: 'This book is the bomb!') do

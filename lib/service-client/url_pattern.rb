@@ -9,7 +9,7 @@ class Service::Client::UrlPattern
   def filled_with(options)
     url = @pattern.clone
     placeholders.each do |placeholder|
-      url.gsub!(/:#{Regexp.escape(placeholder)}:/, options[placeholder].to_s)
+      url.gsub!(/:#{Regexp.escape(placeholder.to_s)}:/, options[placeholder].to_s)
     end
     url
   end
