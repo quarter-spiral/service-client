@@ -5,8 +5,10 @@ gemspec
 
 gem 'rake'
 
-group :test do
+group :development, :test do
   gem 'realweb'
+  gem 'guard-minitest'
+  gem 'guard-bundler'
 end
 
 platforms :jruby do
