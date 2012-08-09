@@ -19,9 +19,9 @@ client = Service::Client.new('http://some=service.example.com/')
 A client route describes a single REST HTTP end-point at the service.
 
 ```ruby
-client.add_route(:author, :post, '/authors/')
-client.add_route(:author, :get,  '/authors/:id:')
-client.add_route(:review, :post,  '/author/:author_id:/books/:book_id:')
+client.urls.add(:author, :post, '/authors/')
+client.urls.add(:author, :get,  '/authors/:id:')
+client.urls.add(:review, :post,  '/author/:author_id:/books/:book_id:')
 ```
 
 ### Requests
@@ -44,7 +44,7 @@ The ``client.urls`` method makes all the created routes available as an easy to 
 
 ### Response
 
-If the HTTP response comes with a 200 status code, the client returns a ``Service::Client::Raw::Response`` object. That allows you to query for the JSON decoded data that came along with the body of the HTTP response. If the body was empty that data is just ``true``. You can also reach for the raw HTTP response:
+If the HTTP response comes with a 200 status code, the client returns a ``Service::Client::Response`` object. That allows you to query for the JSON decoded data that came along with the body of the HTTP response. If the body was empty that data is just ``true``. You can also reach for the raw HTTP response:
 
 ```ruby
 response = client.get(client.urls.author(123))
@@ -101,11 +101,11 @@ The options are a hash. Possible arguments are:
 
 ### Raw responses
 
-Raw requests return a ``Service::Client::Raw::Response`` object that makes it easy to access the status code, headers and body of the response.
+Raw requests return a ``Rack::Response`` object that makes it easy to access the status code, headers and body of the response.
 
 ```ruby
 response = client.raw.get('/author/123/books')
-response.body    # "[{title: 'The guide to a higher enlightment', isbn: '1234567', id: 456}, {title: 'Some book', isbn: '23464527', id: 789}]"
-response.status  # 200
-response.headers # {"Some-Header" => "Some Value", "Another-Header" => "Another Value"}
+response.body   # "[{title: 'The guide to a higher enlightment', isbn: '1234567', id: 456}, {title: 'Some book', isbn: '23464527', id: 789}]"
+response.status # 200
+response.header # {"Some-Header" => "Some Value", "Another-Header" => "Another Value"}
 ```
