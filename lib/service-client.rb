@@ -7,6 +7,9 @@ require "service-client/url_pattern"
 require "service-client/bound_route"
 require "service-client/route"
 require "service-client/route_collection"
+require "service-client/base_response"
+require "service-client/response"
+require "service-client/redirection"
 
 require 'json'
 
@@ -48,7 +51,13 @@ module Service
      url = bound_route.url_for_method(method)
      body = body_hash ? JSON.dump(body_hash) : ''
 
-     raw.request(method, url, body, {})
+     raw_response = raw.request(method, url, body, {})
+     case raw_response.status
+     when 200
+      Response.new(raw_response)
+     when 301, 302, 303, 307
+       raise Redirection.new(raw_response)
+     end
     end
   end
 end

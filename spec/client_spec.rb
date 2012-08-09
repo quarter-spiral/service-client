@@ -2,7 +2,7 @@ require_relative './spec_helper'
 require 'json'
 
 def must_send_request(method, url, json = nil, options = {}, &blck)
-  @client.raw.adapter.expect :request, true, [method, url, json ? JSON.dump(json) : '', options]
+  @client.raw.adapter.expect :request, Rack::Response.new('', 200, {}), [method, url, json ? JSON.dump(json) : '', options]
   yield
   @client.raw.adapter.verify
   @client.raw.adapter = MiniTest::Mock.new
@@ -75,6 +75,55 @@ describe Service::Client do
       lambda {
         @client.get(@client.urls.comments)
       }.must_raise Service::Client::RoutingError
+    end
+
+    describe "responses" do
+      describe "successful" do
+        before do
+          @status = 200
+          @body = JSON.dump(name: 'Peter Lustig', age: 76)
+          @headers = {}
+          raw_response = Rack::Response.new(@body, @status, @headers)
+          @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', '', {}]
+          @response = @client.get(@client.urls.author(123))
+        end
+
+        it "has the raw data" do
+          @response.raw.status.must_equal @status
+          @response.raw.body.must_equal [@body]
+          @headers.each do |key, value|
+            @response.raw.header[key].must_equal value
+          end
+        end
+
+        it "parses them" do
+          @response.data['name'].must_equal 'Peter Lustig'
+          @response.data['age'].must_equal 76
+        end
+
+        it "returns true for data if the response is empty" do
+          raw_response = Rack::Response.new('', 200, {})
+          @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/456', '', {}]
+          @response = @client.get(@client.urls.author(456))
+          @response.data.must_equal true
+        end
+      end
+
+      describe "redirections" do
+        statuses = [301, 302, 303, 307]
+        statuses.each do |status|
+          it "raises a Service::Client::Redirection with the location for HTTP status #{status}" do
+            @client.raw.adapter.expect :request, Rack::Response.new('', status, {Location: 'http://example.com/somewhere/else'}), [:get, 'http://example.com/authors/123', '', {}]
+            begin
+              @client.get(@client.urls.author(123))
+            rescue Service::Client::Redirection => e
+              e.location.must_equal 'http://example.com/somewhere/else'
+            else
+              flunk "Must raise Service::Client::Redirection but didn't!"
+            end
+          end
+        end
+      end
     end
   end
 end
