@@ -44,12 +44,16 @@ The ``client.urls`` method makes all the created routes available as an easy to 
 
 ### Response
 
+#### Success
+
 If the HTTP response comes with a 200 status code, the client returns a ``Service::Client::Response`` object. That allows you to query for the JSON decoded data that came along with the body of the HTTP response. If the body was empty that data is just ``true``. You can also reach for the raw HTTP response:
 
 ```ruby
 response = client.get(client.urls.author(123))
 puts "retrieved a book written by #{response.data['name']} with an HTTP status code of #{response.raw.status}"
 ```
+
+#### Redirections
 
 For any redirecting responses the client raises a ``Service::Client::Redirection`` which can be queried for the redirection location:
 
@@ -60,6 +64,8 @@ rescue Client::Service::Redirection => redirection
   puts "The client has been redirected to: #{redirection.location}"
 end
 ```
+
+#### Errors
 
 For any other response codes the client raises a ``Service::Client::ServiceError`` if the response body was a JSON encoded object with an ``error`` key on the root level.
 
