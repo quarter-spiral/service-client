@@ -39,4 +39,12 @@ describe Service::Client::Adapter::Faraday do
       end
     end
   end
+
+  it "can use other Faraday adapters" do
+    ran = false
+    app = lambda {|env| ran = true; [200, {'Content-Type' => 'text/html'}, ["ran"]]}
+    adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, app])
+    adapter.request(:get, 'http://example.com/adapter_change', '', {})
+    ran.must_equal true
+  end
 end

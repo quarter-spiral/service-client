@@ -9,6 +9,7 @@ group :development, :test do
   gem 'realweb'
   gem 'guard-minitest'
   gem 'guard-bundler'
+  gem 'rack-test'
 end
 
 platforms :jruby do
