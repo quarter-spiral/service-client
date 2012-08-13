@@ -55,7 +55,7 @@ module Service
 
       raw_response = raw.request(method, url, body, {})
       case raw_response.status
-      when 200
+      when 200, 201
        Response.new(raw_response)
       when 301, 302, 303, 307
         raise Redirection.new(raw_response)

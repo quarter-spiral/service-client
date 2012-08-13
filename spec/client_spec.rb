@@ -91,33 +91,37 @@ describe Service::Client do
 
     describe "responses" do
       describe "successful" do
-        before do
-          @status = 200
-          @body = JSON.dump(name: 'Peter Lustig', age: 76)
-          @headers = {}
-          raw_response = Rack::Response.new(@body, @status, @headers)
-          @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', '', {}]
-          @response = @client.get(@client.urls.author(123))
-        end
+        statuses = [200, 201]
+        statuses.each do |status|
+          describe "with status #{status}" do
+            before do
+              @body = JSON.dump(name: 'Peter Lustig', age: 76)
+              @headers = {}
+              raw_response = Rack::Response.new(@body, status, @headers)
+              @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', '', {}]
+              @response = @client.get(@client.urls.author(123))
+            end
 
-        it "has the raw data" do
-          @response.raw.status.must_equal @status
-          @response.raw.body.must_equal [@body]
-          @headers.each do |key, value|
-            @response.raw.header[key].must_equal value
+            it "has the raw data" do
+              @response.raw.status.must_equal status
+              @response.raw.body.must_equal [@body]
+              @headers.each do |key, value|
+                @response.raw.header[key].must_equal value
+              end
+            end
+
+            it "parses them" do
+              @response.data['name'].must_equal 'Peter Lustig'
+              @response.data['age'].must_equal 76
+            end
+
+            it "returns true for data if the response is empty" do
+              raw_response = Rack::Response.new('', status, {})
+              @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/456', '', {}]
+              @response = @client.get(@client.urls.author(456))
+              @response.data.must_equal true
+            end
           end
-        end
-
-        it "parses them" do
-          @response.data['name'].must_equal 'Peter Lustig'
-          @response.data['age'].must_equal 76
-        end
-
-        it "returns true for data if the response is empty" do
-          raw_response = Rack::Response.new('', 200, {})
-          @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/456', '', {}]
-          @response = @client.get(@client.urls.author(456))
-          @response.data.must_equal true
         end
       end
 
