@@ -37,7 +37,7 @@ module Service
 
       protected
       def default_adapter
-        Adapter::Faraday
+        Adapter::Faraday.new
       end
 
       def absolutize_url(url)
