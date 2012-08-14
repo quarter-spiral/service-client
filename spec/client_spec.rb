@@ -43,7 +43,7 @@ describe Service::Client do
   end
 
   it "uses the faraday adapter as a default" do
-    Service::Client.new('http://example.com').raw.adapter.must_equal Service::Client::Adapter::Faraday
+    Service::Client.new('http://example.com').raw.adapter.must_be_instance_of Service::Client::Adapter::Faraday
   end
 
   describe "high level interface" do
