@@ -1,5 +1,9 @@
 # 0.0.6 - 03rd October 2012
 
+- Fixes the wrongly named Authorization HTTP header
+
+# 0.0.6 - 03rd October 2012
+
 - Moves the token to be passed in to each request instead of per client instance
 
 # 0.0.5 - 03rd October 2012
