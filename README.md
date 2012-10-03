@@ -27,18 +27,18 @@ client.urls.add(:review, :post,  '/author/:author_id:/books/:book_id:')
 ### Requests
 
 ```ruby
-client.post(client.urls.author, name: 'Peter Lustig')
-client.get(client.urls.author(123))
-client.post(client.urls.review(author_id: 123, book_id: 456), name: 'Ronald Review', comment: 'This book is the bomb!')
+client.post(client.urls.author, token, name: 'Peter Lustig')
+client.get(client.urls.author(123), token)
+client.post(client.urls.review(author_id: 123, book_id: 456), token, name: 'Ronald Review', comment: 'This book is the bomb!')
 ```
 
 Each ``Service::Client`` instance supports the ``get``, ``post``, ``put`` and ``delete`` methods. They all share the same method signature of:
 
 ```ruby
-client.method(URL, BODY_HASH)
+client.method(URL, TOKEN, BODY_HASH)
 ```
 
-The URL is a relative URL to the base url the client has been created with. The BODY_HASH is any Ruby hash. The hash becomes the body of the HTTP request after it has been dumped to JSON.
+The URL is a relative URL to the base url the client has been created with. TOKEN is an OAuth token to authenticat the request. The BODY_HASH is any Ruby hash. The hash becomes the body of the HTTP request after it has been dumped to JSON.
 
 The ``client.urls`` method makes all the created routes available as an easy to use URL builder. The URL builder takes zero arguments when the URL does not have any arguments. It can also take an array of the URL paramters in their respective order or a hash to built the URL by it's named parameters.
 
@@ -49,7 +49,7 @@ The ``client.urls`` method makes all the created routes available as an easy to 
 If the HTTP response comes with a 200 status code, the client returns a ``Service::Client::Response`` object. That allows you to query for the JSON decoded data that came along with the body of the HTTP response. If the body was empty that data is just ``true``. You can also reach for the raw HTTP response:
 
 ```ruby
-response = client.get(client.urls.author(123))
+response = client.get(client.urls.author(123), token)
 puts "retrieved a book written by #{response.data['name']} with an HTTP status code of #{response.raw.status}"
 ```
 
@@ -59,7 +59,7 @@ For any redirecting responses the client raises a ``Service::Client::Redirection
 
 ```ruby
 begin
-  client.get(client.urls.author(123))
+  client.get(client.urls.author(123), token)
 rescue Client::Service::Redirection => redirection
   puts "The client has been redirected to: #{redirection.location}"
 end
@@ -71,7 +71,7 @@ For any other response codes the client raises a ``Service::Client::ServiceError
 
 ```ruby
 begin
-  client.get(client.urls.author(678))
+  client.get(client.urls.author(678), token)
 rescue Client::Service::ServiceError => e
   puts "A service error has occured. Error description: #{e.error}"
 end
@@ -81,7 +81,7 @@ If the body was not JSON encoded at all or did not include the ``error`` key on 
 
 ```ruby
 begin
-  client.get(client.urls.author(678))
+  client.get(client.urls.author(678), token)
 rescue Client::Service::Error => e
   puts "An error has occured. Error code: #{e.response.status} Error body: #{e.response.body}"
 end
