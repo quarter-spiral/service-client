@@ -1,3 +1,7 @@
+# 0.0.5 - 03rd October 2012
+
+- Adds OAuth authentication
+
 # 0.0.4 - 14th August 2012
 
 - Fixed bug that prevented the default adapter to be used correctly.
