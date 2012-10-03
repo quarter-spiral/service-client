@@ -56,19 +56,19 @@ describe Service::Client do
     end
 
     it "calls the right url with the right method after adding it" do
-      must_send_request(:post, 'http://example.com/authors/', {name: 'Peter Lustig'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+      must_send_request(:post, 'http://example.com/authors/', {name: 'Peter Lustig'}, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
         @client.post(@client.urls.author, TOKEN, name: 'Peter Lustig')
       end
 
-      must_send_request(:get, 'http://example.com/authors/123', nil, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+      must_send_request(:get, 'http://example.com/authors/123', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
         @client.get(@client.urls.author(123), TOKEN)
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
         @client.post(@client.urls.review(author_id: 123, book_id: 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
         @client.post(@client.urls.review(123, 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       end
     end
