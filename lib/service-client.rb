@@ -17,10 +17,11 @@ require 'json'
 
 module Service
   class Client
-    attr_reader :base_url
+    attr_reader :base_url, :token
 
-    def initialize(base_url)
+    def initialize(base_url, token)
       @base_url = base_url
+      @token = token
     end
 
     def raw
@@ -53,7 +54,7 @@ module Service
       url = bound_route.url_for_method(method)
       body = body_hash ? JSON.dump(body_hash) : ''
 
-      raw_response = raw.request(method, url, body, {})
+      raw_response = raw.request(method, url, body, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"})
       case raw_response.status
       when 200, 201
        Response.new(raw_response)

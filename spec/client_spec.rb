@@ -20,9 +20,11 @@ def must_raise_response_error(body)
    end
 end
 
+token = '123'
+
 describe Service::Client do
   before do
-    @client = Service::Client.new('http://example.com')
+    @client = Service::Client.new('http://example.com', token)
     @client.raw.adapter = MiniTest::Mock.new
   end
 
@@ -43,7 +45,7 @@ describe Service::Client do
   end
 
   it "uses the faraday adapter as a default" do
-    Service::Client.new('http://example.com').raw.adapter.must_be_instance_of Service::Client::Adapter::Faraday
+    Service::Client.new('http://example.com', token).raw.adapter.must_be_instance_of Service::Client::Adapter::Faraday
   end
 
   describe "high level interface" do
@@ -54,19 +56,19 @@ describe Service::Client do
     end
 
     it "calls the right url with the right method after adding it" do
-      must_send_request(:post, 'http://example.com/authors/', name: 'Peter Lustig') do
+      must_send_request(:post, 'http://example.com/authors/', {name: 'Peter Lustig'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
         @client.post(@client.urls.author, name: 'Peter Lustig')
       end
 
-      must_send_request(:get, 'http://example.com/authors/123') do
+      must_send_request(:get, 'http://example.com/authors/123', nil, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
         @client.get(@client.urls.author(123))
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', name: 'Ronald Review', comment: 'This book is the bomb!') do
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
         @client.post(@client.urls.review(author_id: 123, book_id: 456), name: 'Ronald Review', comment: 'This book is the bomb!')
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', name: 'Ronald Review', comment: 'This book is the bomb!') do
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
         @client.post(@client.urls.review(123, 456), name: 'Ronald Review', comment: 'This book is the bomb!')
       end
     end
