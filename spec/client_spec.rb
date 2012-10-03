@@ -1,6 +1,8 @@
 require_relative './spec_helper'
 require 'json'
 
+TOKEN = '123'
+
 def must_send_request(method, url, json = nil, options = {}, &blck)
   @client.raw.adapter.expect :request, Rack::Response.new('', 200, {}), [method, url, json ? JSON.dump(json) : '', options]
   yield
@@ -12,7 +14,7 @@ def must_raise_response_error(body)
   raw_response = Rack::Response.new(body, 500, {})
   @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', body, {}]
   begin
-    @client.get(@client.urls.author(123))
+    @client.get(@client.urls.author(123), TOKEN)
     flunk "Must raise Service::Client::ResponseError but didn't!"
    rescue Service::Client::ResponseError => e
      e.response.status.must_equal 500
@@ -20,11 +22,9 @@ def must_raise_response_error(body)
    end
 end
 
-token = '123'
-
 describe Service::Client do
   before do
-    @client = Service::Client.new('http://example.com', token)
+    @client = Service::Client.new('http://example.com')
     @client.raw.adapter = MiniTest::Mock.new
   end
 
@@ -45,7 +45,7 @@ describe Service::Client do
   end
 
   it "uses the faraday adapter as a default" do
-    Service::Client.new('http://example.com', token).raw.adapter.must_be_instance_of Service::Client::Adapter::Faraday
+    Service::Client.new('http://example.com').raw.adapter.must_be_instance_of Service::Client::Adapter::Faraday
   end
 
   describe "high level interface" do
@@ -56,38 +56,38 @@ describe Service::Client do
     end
 
     it "calls the right url with the right method after adding it" do
-      must_send_request(:post, 'http://example.com/authors/', {name: 'Peter Lustig'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
-        @client.post(@client.urls.author, name: 'Peter Lustig')
+      must_send_request(:post, 'http://example.com/authors/', {name: 'Peter Lustig'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.post(@client.urls.author, TOKEN, name: 'Peter Lustig')
       end
 
-      must_send_request(:get, 'http://example.com/authors/123', nil, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
-        @client.get(@client.urls.author(123))
+      must_send_request(:get, 'http://example.com/authors/123', nil, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.get(@client.urls.author(123), TOKEN)
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
-        @client.post(@client.urls.review(author_id: 123, book_id: 456), name: 'Ronald Review', comment: 'This book is the bomb!')
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.post(@client.urls.review(author_id: 123, book_id: 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       end
 
-      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{token}"}) do
-        @client.post(@client.urls.review(123, 456), name: 'Ronald Review', comment: 'This book is the bomb!')
+      must_send_request(:post, 'http://example.com/authors/123/books/456', {name: 'Ronald Review', comment: 'This book is the bomb!'}, headers: {'HTTP-AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.post(@client.urls.review(123, 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       end
     end
 
     it "raises an error when no route for a given method/resource combination exist" do
       lambda {
-        @client.post(@client.urls.author(123))
+        @client.post(@client.urls.author(123), TOKEN)
       }.must_raise Service::Client::RoutingError
 
       lambda {
-        @client.get(@client.urls.author)
+        @client.get(@client.urls.author, TOKEN)
       }.must_raise Service::Client::RoutingError
 
       lambda {
-        @client.get(@client.urls.review(123, 456), name: 'Ronald Review', comment: 'This book is the bomb!')
+        @client.get(@client.urls.review(123, 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       }.must_raise Service::Client::RoutingError
 
       lambda {
-        @client.get(@client.urls.comments)
+        @client.get(@client.urls.comments, TOKEN)
       }.must_raise Service::Client::RoutingError
     end
 
@@ -101,7 +101,7 @@ describe Service::Client do
               @headers = {}
               raw_response = Rack::Response.new(@body, status, @headers)
               @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', '', {}]
-              @response = @client.get(@client.urls.author(123))
+              @response = @client.get(@client.urls.author(123), TOKEN)
             end
 
             it "has the raw data" do
@@ -120,7 +120,7 @@ describe Service::Client do
             it "returns true for data if the response is empty" do
               raw_response = Rack::Response.new('', status, {})
               @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/456', '', {}]
-              @response = @client.get(@client.urls.author(456))
+              @response = @client.get(@client.urls.author(456), TOKEN)
               @response.data.must_equal true
             end
           end
@@ -134,7 +134,7 @@ describe Service::Client do
             @client.raw.adapter.expect :request, Rack::Response.new('', status, {Location: 'http://example.com/somewhere/else'}), [:get, 'http://example.com/authors/123', '', {}]
 
             begin
-              @client.get(@client.urls.author(123))
+              @client.get(@client.urls.author(123), TOKEN)
               flunk "Must raise Service::Client::Redirection but didn't!"
             rescue Service::Client::Redirection => e
               e.location.must_equal 'http://example.com/somewhere/else'
@@ -156,7 +156,7 @@ describe Service::Client do
               @client.raw.adapter.expect :request, raw_response, [:get, 'http://example.com/authors/123', @body, {}]
 
               begin
-                @client.get(@client.urls.author(123))
+                @client.get(@client.urls.author(123), TOKEN)
                 flunk "Must raise Service::Client::ServiceError but didn't!"
               rescue Service::Client::ServiceError => e
                 e.error.must_equal 'This is why!'

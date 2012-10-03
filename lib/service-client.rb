@@ -17,11 +17,10 @@ require 'json'
 
 module Service
   class Client
-    attr_reader :base_url, :token
+    attr_reader :base_url
 
-    def initialize(base_url, token)
+    def initialize(base_url)
       @base_url = base_url
-      @token = token
     end
 
     def raw
@@ -33,24 +32,24 @@ module Service
     end
     alias urls routes
 
-    def get(bound_route, body_hash = nil)
-      request(:get, bound_route, body_hash)
+    def get(bound_route, token, body_hash = nil)
+      request(:get, token, bound_route, body_hash)
     end
 
-    def put(bound_route, body_hash = nil)
-      request(:put, bound_route, body_hash)
+    def put(bound_route, token, body_hash = nil)
+      request(:put, token, bound_route, body_hash)
     end
 
-    def post(bound_route, body_hash = nil)
-      request(:post, bound_route, body_hash)
+    def post(bound_route, token, body_hash = nil)
+      request(:post, token, bound_route, body_hash)
     end
 
-    def delete(bound_route, body_hash = nil)
-      request(:delete, bound_route, body_hash)
+    def delete(bound_route, token, body_hash = nil)
+      request(:delete, token, bound_route, body_hash)
     end
 
     protected
-    def request(method, bound_route, body_hash)
+    def request(method, token, bound_route, body_hash)
       url = bound_route.url_for_method(method)
       body = body_hash ? JSON.dump(body_hash) : ''
 
