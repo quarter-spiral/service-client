@@ -1,4 +1,4 @@
-# 0.0.8 - 07th November 2012 WIP
+# 0.0.8 - 07th November 2012
 
 - Handles 304 - Not Modified responses correctly
 
