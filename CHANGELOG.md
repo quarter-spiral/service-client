@@ -1,4 +1,8 @@
-# 0.0.6 - 03rd October 2012
+# 0.0.8 - 07th November 2012 WIP
+
+- Handles 304 - Not Modified responses correctly
+
+# 0.0.7 - 03rd October 2012
 
 - Fixes the wrongly named Authorization HTTP header
 

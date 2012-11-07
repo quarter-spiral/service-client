@@ -55,7 +55,7 @@ module Service
 
       raw_response = raw.request(method, url, body, headers: {'AUTHORIZATION' => "Bearer #{token}"})
       case raw_response.status
-      when 200, 201
+      when 200, 201, 304
        Response.new(raw_response)
       when 301, 302, 303, 307
         raise Redirection.new(raw_response)
