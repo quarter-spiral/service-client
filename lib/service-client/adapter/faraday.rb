@@ -29,7 +29,7 @@ module Service
           request.body = body
           request.headers = options[:headers] || {}
         end
-        Rack::Response.new(response.body, response.status, response.headers)
+        Rack::Response.new(response.body || '', response.status, response.headers)
       end
     end
   end

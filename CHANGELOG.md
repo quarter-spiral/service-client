@@ -1,3 +1,7 @@
+# 0.0.9 WIP
+
+- Does not error out on empty response bodies anymore
+
 # 0.0.8 - 07th November 2012
 
 - Handles 304 - Not Modified responses correctly
