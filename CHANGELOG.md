@@ -1,4 +1,4 @@
-# 0.0.9 WIP
+# 0.0.9
 
 - Does not error out on empty response bodies anymore
 
