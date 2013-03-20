@@ -14,6 +14,7 @@ require "service-client/response"
 require "service-client/redirection"
 
 require 'json'
+require 'cgi'
 
 module Service
   class Client
@@ -51,7 +52,13 @@ module Service
     protected
     def request(method, token, bound_route, body_hash)
       url = bound_route.url_for_method(method)
-      body = body_hash ? JSON.dump(body_hash) : ''
+
+      body = nil
+      if method == :get
+        url = append_body_hash_to_url(url, body_hash)
+      else
+        body = body_hash ? JSON.dump(body_hash) : ''
+      end
 
       raw_response = raw.request(method, url, body, headers: {'AUTHORIZATION' => "Bearer #{token}"})
       case raw_response.status
@@ -72,6 +79,17 @@ module Service
           raise ResponseError.new(raw_response)
         end
       end
+    end
+
+    def append_body_hash_to_url(url, body_hash)
+      return url if !body_hash || body_hash.empty?
+
+      url += (url.include?('?') ? '&' : '?')
+      url.gsub!(/&+?/, '&')
+      url.gsub!(/\?+?/, '?')
+      url + body_hash.map do |key, value|
+        "#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s)}"
+      end.join('&')
     end
   end
 end

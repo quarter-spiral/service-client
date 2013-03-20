@@ -4,7 +4,7 @@ require 'json'
 TOKEN = '123'
 
 def must_send_request(method, url, json = nil, options = {}, &blck)
-  @client.raw.adapter.expect :request, Rack::Response.new('', 200, {}), [method, url, json ? JSON.dump(json) : '', options]
+  @client.raw.adapter.expect :request, Rack::Response.new('', 200, {}), [method, url, json ? JSON.dump(json) : nil, options]
   yield
   @client.raw.adapter.verify
   @client.raw.adapter = MiniTest::Mock.new
@@ -52,6 +52,7 @@ describe Service::Client do
     before do
       @client.urls.add(:author, :post, '/authors/')
       @client.urls.add(:author, :get,  '/authors/:id:')
+      @client.urls.add(:author_with_query, :get,  '/authors/:id:/another-fixed-part?blub=1')
       @client.urls.add(:review, :post,  '/authors/:author_id:/books/:book_id:')
     end
 
@@ -72,6 +73,17 @@ describe Service::Client do
         @client.post(@client.urls.review(123, 456), TOKEN, name: 'Ronald Review', comment: 'This book is the bomb!')
       end
     end
+
+    it "uses query parameters instead of JSON bodies for GET requests" do
+      must_send_request(:get, 'http://example.com/authors/123?some=arguments&are=cool%26not%3Dbody', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.get(@client.urls.author(123), TOKEN, {some: 'arguments', are: "cool&not=body"})
+      end
+
+      must_send_request(:get, 'http://example.com/authors/123/another-fixed-part?blub=1&some=arguments&are=cool%26not%3Dbody', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.get(@client.urls.author_with_query(123), TOKEN, {some: 'arguments', are: "cool&not=body"})
+      end
+    end
+
 
     it "raises an error when no route for a given method/resource combination exist" do
       lambda {

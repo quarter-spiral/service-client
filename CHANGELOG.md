@@ -1,3 +1,7 @@
+# 0.0.10 WIP
+
+* Makes GET requests use query parameters instead of a JSON body
+
 # 0.0.9
 
 - Does not error out on empty response bodies anymore
