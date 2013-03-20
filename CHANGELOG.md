@@ -1,4 +1,4 @@
-# 0.0.10 WIP
+# 0.0.10
 
 * Makes GET requests use query parameters instead of a JSON body
 
