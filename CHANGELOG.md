@@ -1,4 +1,4 @@
-# 0.0.11 WIP
+# 0.0.11
 
 * Escapes hashes and arrays in GET query parameters properly
 
