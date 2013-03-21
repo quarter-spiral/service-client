@@ -75,15 +75,14 @@ describe Service::Client do
     end
 
     it "uses query parameters instead of JSON bodies for GET requests" do
-      must_send_request(:get, 'http://example.com/authors/123?some=arguments&are=cool%26not%3Dbody', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
-        @client.get(@client.urls.author(123), TOKEN, {some: 'arguments', are: "cool&not=body"})
+      must_send_request(:get, 'http://example.com/authors/123?some=arguments&are=cool%26not%3Dbody&array%5B%5D=12&array%5B%5D=gla&hash%5Bblub%5D=123&hash%5Bbla%5D=moep', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
+        @client.get(@client.urls.author(123), TOKEN, {some: 'arguments', are: "cool&not=body", array: ["12", 'gla'], hash: {"blub" => "123", "bla" => "moep"}})
       end
 
       must_send_request(:get, 'http://example.com/authors/123/another-fixed-part?blub=1&some=arguments&are=cool%26not%3Dbody', nil, headers: {'AUTHORIZATION' => "Bearer #{TOKEN}"}) do
         @client.get(@client.urls.author_with_query(123), TOKEN, {some: 'arguments', are: "cool&not=body"})
       end
     end
-
 
     it "raises an error when no route for a given method/resource combination exist" do
       lambda {

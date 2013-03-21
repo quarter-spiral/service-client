@@ -1,3 +1,7 @@
+# 0.0.11 WIP
+
+* Escapes hashes and arrays in GET query parameters properly
+
 # 0.0.10
 
 * Makes GET requests use query parameters instead of a JSON body

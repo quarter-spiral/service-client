@@ -84,12 +84,15 @@ module Service
     def append_body_hash_to_url(url, body_hash)
       return url if !body_hash || body_hash.empty?
 
-      url += (url.include?('?') ? '&' : '?')
-      url.gsub!(/&+?/, '&')
-      url.gsub!(/\?+?/, '?')
-      url + body_hash.map do |key, value|
-        "#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s)}"
-      end.join('&')
+      uri = URI.parse(url)
+
+      if body_hash && !body_hash.empty?
+        uri.query += '&' if uri.query
+        uri.query ||= ''
+        uri.query += Faraday::Utils.build_nested_query(body_hash)
+      end
+
+      uri.to_s
     end
   end
 end
