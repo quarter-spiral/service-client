@@ -14,7 +14,7 @@ module Service
 
         auth = (uri.user && uri.password) ? "#{uri.user}:#{uri.password}@" : ''
         base_url = "#{uri.scheme}://#{auth}#{uri.host}:#{uri.port}"
-        path = "#{uri.path}?#{uri.query}"
+        path = "#{uri.path}"
 
         connection = ::Faraday.new(:url => base_url) do |faraday|
           if @adapter
@@ -27,6 +27,9 @@ module Service
         response = connection.send(method) do |request|
           request.url path
           request.body = body
+          if method == :get && uri.query
+            request.params = ::Faraday::Utils.parse_nested_query(uri.query)
+          end
           request.headers = options[:headers] || {}
         end
         Rack::Response.new(response.body || '', response.status, response.headers)

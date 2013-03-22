@@ -1,5 +1,6 @@
 # 0.0.12 WIP
 
+* Fixes GET request parameter handling in Faraday adapter
 * Adds JSON Content-Type to each request
 
 # 0.0.11
