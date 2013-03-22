@@ -60,7 +60,12 @@ module Service
         body = body_hash ? JSON.dump(body_hash) : ''
       end
 
-      raw_response = raw.request(method, url, body, headers: {'AUTHORIZATION' => "Bearer #{token}"})
+      headers = {
+        'AUTHORIZATION' => "Bearer #{token}",
+        'Content-Type' => 'application/json'
+      }
+
+      raw_response = raw.request(method, url, body, headers: headers)
       case raw_response.status
       when 200, 201, 304
        Response.new(raw_response)

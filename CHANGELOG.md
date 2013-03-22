@@ -1,3 +1,7 @@
+# 0.0.12 WIP
+
+* Adds JSON Content-Type to each request
+
 # 0.0.11
 
 * Escapes hashes and arrays in GET query parameters properly
