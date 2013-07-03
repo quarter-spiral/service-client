@@ -1,4 +1,4 @@
-# 0.0.13 / Unreleased
+# 0.0.13 / 2013-07-03
 
 * Adds error message to ServiceErrors
 
