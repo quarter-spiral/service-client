@@ -1,3 +1,7 @@
+# 0.0.13 / Unreleased
+
+* Adds error message to ServiceErrors
+
 # 0.0.12
 
 * Fixes GET request parameter handling in Faraday adapter
