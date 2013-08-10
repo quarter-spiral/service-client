@@ -47,4 +47,27 @@ describe Service::Client::Adapter::Faraday do
     adapter.request(:get, 'http://example.com/adapter_change', '', {})
     ran.must_equal true
   end
+
+  describe 'faraday builder' do
+    it 'can be used' do
+      ran = false
+      builder_called = false
+      app = lambda {|env| ran = true; [200, {'Content-Type' => 'text/html'}, ["ran"]]}
+      adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, app], builder: lambda {|faraday| builder_called = true})
+      adapter.request(:get, 'http://example.com/adapter_change', '', {})
+      ran.must_equal true
+      builder_called.must_equal true
+    end
+
+    it 'can skip the adapter call' do
+      ran = false
+      builder_called = false
+      app = lambda {|env| ran = true; [200, {'Content-Type' => 'text/html'}, ["ran"]]}
+      adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, app], builder: lambda {|faraday| builder_called = true; false})
+      adapter.request(:get, 'http://example.com/adapter_change', '', {})
+      # must be false because the rack adapter is not used as the builder returns false
+      ran.must_equal false
+      builder_called.must_equal true
+    end
+  end
 end

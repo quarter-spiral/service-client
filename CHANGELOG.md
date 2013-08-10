@@ -1,3 +1,7 @@
+# 0.0.14 / Unreleased
+
+* Adds a way to specify Faraday builder
+
 # 0.0.13 / 2013-07-03
 
 * Adds error message to ServiceErrors
