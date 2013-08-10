@@ -1,4 +1,4 @@
-# 0.0.14 / Unreleased
+# 0.0.14 / 2013-08-10
 
 * Adds a way to specify Faraday builder
 
